@@ -1,6 +1,17 @@
-import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native'
+import { Image, ImageSourcePropType, ScrollView, Text, TouchableOpacity, View } from 'react-native'
 import { styles } from"./style"
 import { Link } from 'expo-router'
+import { useEffect, useState } from 'react'
+
+
+export type ProdutctType ={
+    id: number,
+    name: string,
+    price: number,
+    description: string,
+    ingredientes: string,
+    imgUrl: ImageSourcePropType
+}
 
 export default function Index() {
     const MENU = [
@@ -25,7 +36,21 @@ export default function Index() {
         price:111.60,
         image:require("@/assets/images/frango.png")
     }
+
 ]
+
+    const [produtos, setProdutos] = useState<ProdutctType[]>()
+
+    function fetchProdutos(){
+        fetch("http://localhost:8080/produto/")
+        .then((res) => res.json())
+        .then((data) => setProdutos(data))
+    }
+
+    useEffect(() => {
+        fetchProdutos()
+    }, [])
+
 
     return (
         <View style={styles.container}>
@@ -39,7 +64,7 @@ export default function Index() {
 
         <View style={styles.tabs}>
             {["Combos", "Tapioca Doce", "Tapioca Salgada", "Promoção"] .map((tab) => (
-            <TouchableOpacity>
+            <TouchableOpacity key={tab}>
                 <Text style ={styles.tabText}> {tab}</Text>
             </TouchableOpacity>
            
@@ -51,15 +76,15 @@ export default function Index() {
 
 <ScrollView style = {styles.menuList}>
     {
-        MENU.map((item) => (
-            <Link href={"/produto/1"} asChild>
+        produtos?.map((item) => (
+            <Link href={`/produto/${item.id}`} asChild key={item.id}>
             <TouchableOpacity style = {styles.menuItem}>
             <View style={styles.menuContent}>
                 <Text style ={styles.itemName}>{item.name}</Text>
                 <Text>{item.description}</Text>
                 <Text style ={styles.itemPrice}>{item.price}</Text>
             </View>
-            <Image style ={styles.itemImage} source={item.image}/> 
+            <Image style ={styles.itemImage} source={item.imgUrl}/> 
             </TouchableOpacity>
             </Link>
         ))
